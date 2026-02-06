@@ -31,8 +31,7 @@ docker rm test
 3) by direct push to main
     - tag of "main" is added to container registry
     git checkout main
-    # edit your file
+    <edit your file>
     git add <file>
     git commit -m <commit message>
     git push
-
