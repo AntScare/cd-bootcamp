@@ -1,28 +1,43 @@
-# Copyright IBM Corp. 2016, 2024
-# SPDX-License-Identifier: MPL-2.0
+# syntax=docker/dockerfile:1
 
-FROM gcr.io/distroless/static-debian12:nonroot as default
+# Build stage - stažení http-echo binárky
+FROM alpine:3.19 AS downloader
 
-# TARGETOS and TARGETARCH are set automatically when --platform is provided.
-ARG TARGETOS
-ARG TARGETARCH
-ARG PRODUCT_VERSION
-ARG BIN_NAME
-ENV PRODUCT_NAME=$BIN_NAME
+# Instalace curl pro stažení binárky
+RUN apk add --no-cache curl
 
-LABEL name="http-echo" \
-      maintainer="HashiCorp Consul Team <consul@hashicorp.com>" \
-      vendor="HashiCorp" \
-      version=$PRODUCT_VERSION \
-      release=$PRODUCT_VERSION \
-      licenses="MPL-2.0" \
-      summary="A test webserver that echos a response. You know, for kids."
+# Stažení http-echo z GitHub releases
+ARG HTTP_ECHO_VERSION=1.0.0
+RUN curl -L https://github.com/hashicorp/http-echo/releases/download/v${HTTP_ECHO_VERSION}/http-echo_${HTTP_ECHO_VERSION}_linux_amd64.tar.gz \
+    -o http-echo.tar.gz && \
+    tar -xzf http-echo.tar.gz && \
+    chmod +x http-echo
 
-COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /
-COPY LICENSE /usr/share/doc/$PRODUCT_NAME/LICENSE.txt
+# Final stage
+FROM alpine:3.19
 
-EXPOSE 5678/tcp
+# Instalace curl pro healthcheck
+RUN apk add --no-cache curl ca-certificates && \
+    addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser appuser
 
-ENV ECHO_TEXT="hello-world"
+# Kopírování binárky z build stage
+COPY --from=downloader /http-echo /usr/local/bin/http-echo
 
-ENTRYPOINT ["/http-echo"]
+# Vytvoření wrapper scriptu pro správné routování
+RUN echo '#!/bin/sh' > /usr/local/bin/entrypoint.sh && \
+    echo 'exec /usr/local/bin/http-echo -listen=:8080 -text="Hello from http-echo!"' >> /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
+# Nastavení non-root uživatele
+USER appuser
+
+# Expose portu
+EXPOSE 8080
+
+# Healthcheck - http-echo odpovídá na všechny cesty včetně /healthz
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/healthz || exit 1
+
+# Spuštění aplikace
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
