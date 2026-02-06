@@ -12,16 +12,26 @@ http-echo -listen=:8080 -text="hello world"
 Then visit http://localhost:8080/ in your browser.
 
 
-# Test Dockerfile-fixed
+# How to build Dockerfile?
 docker build -t http-echo:test .
 
-# Po úspěšném buildu
+# How to test locally?
 docker run -d --name test -p 8080:8080 http-echo:test
 curl http://localhost:8080/
 docker stop test
 docker rm test
 
-# Jak vytvořit release image
-git tag v1.0.0
-git push origin v1.0.0
-
+# How to trigger GitHub Actions Pipeline?
+1) by creating a pull request
+   - sha short tag is added to container registry
+2) by pushing a tag
+   - tag is added to container registry
+       git tag v1.0.0
+       git push origin v1.0.0
+3) by direct push to main
+    - tag of "main" is added to container registry
+    git checkout main
+    # edit your file
+    git add <file>
+    git commit -m <commit message>
+    git push
