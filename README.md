@@ -20,3 +20,7 @@ docker run -d --name test -p 8080:8080 http-echo:test
 curl http://localhost:8080/
 docker stop test
 docker rm test
+
+# Jak vytvořit release image
+git tag v1.0.0
+git push origin v1.0.0
