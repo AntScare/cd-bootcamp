@@ -8,9 +8,10 @@ RUN apk add --no-cache curl
 
 # Stažení http-echo z GitHub releases
 ARG HTTP_ECHO_VERSION=1.0.0
-RUN curl -L https://github.com/hashicorp/http-echo/releases/download/v${HTTP_ECHO_VERSION}/http-echo_${HTTP_ECHO_VERSION}_linux_amd64.tar.gz \
-    -o http-echo.tar.gz && \
-    tar -xzf http-echo.tar.gz && \
+RUN curl -L \
+    https://releases.hashicorp.com/http-echo/${HTTP_ECHO_VERSION}/http-echo_${HTTP_ECHO_VERSION}_linux_amd64.zip \
+    -o http-echo.zip && \
+    unzip http-echo.zip && \
     chmod +x http-echo
 
 # Final stage
