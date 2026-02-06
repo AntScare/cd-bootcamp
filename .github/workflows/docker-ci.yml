@@ -42,6 +42,8 @@ jobs:
           context: .
           push: false
           tags: local/dry-run:test
+          cache-from: type=registry,ref=${{ steps.image.outputs.IMAGE }}:cache
+          cache-to: type=registry,ref=${{ steps.image.outputs.IMAGE }}:cache,mode=max
 
       # Volitelně testy:
       # - name: Run tests
