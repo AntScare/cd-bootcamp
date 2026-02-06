@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: "https://github.com/AntScare/cd-bootcamp.git"
     targetRevision: main
-    path: "helm/http-echo-chart/http-echo-chart"
+    path: "helm/http-echo-chart/"
   destination:
     server: "https://kubernetes.default.svc"
     namespace: apps
