@@ -6,6 +6,9 @@ terraform {
     null = {
       source = "hashicorp/null"
     }
+    helm = {
+      source  = "hashicorp/helm"
+    }
   }
 }
 
@@ -15,6 +18,22 @@ provider "kubernetes" {
   config_context = "minikube"      # Force Terraform to use the minikube context
 }
 
+
+provider "helm" {
+  kubernetes = {
+    config_path    = "~/.kube/config"
+    config_context = "minikube"
+  }
+}
+
+# Helm release pro Argo CD
+resource "helm_release" "argocd" {
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
+  create_namespace = true
+}
 
 # Spuštění minikube clusteru lokálně - pro Windows
 resource "null_resource" "start_minikube" {
