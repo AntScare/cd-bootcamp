@@ -42,3 +42,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Spuštění aplikace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+#TBD zaridit aby aplikace neodpovidal na jine cesty nez / a /healthz
