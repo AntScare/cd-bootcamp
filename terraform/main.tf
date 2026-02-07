@@ -35,6 +35,18 @@ resource "helm_release" "argocd" {
   create_namespace = true
 }
 
+resource "helm_release" "nginx_ingress" {
+  name       = "ingress-nginx"
+  namespace  = "ingress-nginx"
+  create_namespace = true
+  chart      = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+
+  values = [
+    file("${path.module}/nginx-values.yaml")
+  ]
+}
+
 # Spuštění minikube clusteru lokálně - pro Windows
 resource "null_resource" "start_minikube" {
   provisioner "local-exec" {
