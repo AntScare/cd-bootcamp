@@ -22,7 +22,7 @@ service:
 ## Ingress ressource
 ingress:
   enabled: true
-#  host: {{.Release.Name}}.k8s.local
+  host: {{.Release.Name}}.k8s.local
 #  defaultBackend: false
   servicePort: http
   annotations: {}

@@ -95,3 +95,39 @@ jobs:
             ${{ startsWith(github.ref, 'refs/tags/v') && format('{0}:{1}', steps.image.outputs.IMAGE, github.ref_name) || '' }}
           cache-from: type=registry,ref=${{ steps.image.outputs.IMAGE }}:cache
           cache-to: type=registry,ref=${{ steps.image.outputs.IMAGE }}:cache,mode=max
+
+  # ============================
+  # PROMOTE – Update values.yaml for Argo
+  # ============================
+  promote-to-argo:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine Docker image tag for promotion
+        id: get-tag
+        run: |
+          # Use semantic version if this is a v* tag, else use short SHA
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            IMAGE_TAG=${GITHUB_REF_NAME}
+          else
+            IMAGE_TAG=sha-${GITHUB_SHA::7}
+          fi
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update Helm chart values.yaml with new image tag
+        run: |
+          CHART_VALUES="helm/http-echo-chart/values.yaml"
+          sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|" $CHART_VALUES
+
+      - name: Commit updated Helm values.yaml
+        uses: peter-evans/commit@v5
+        with:
+          message: "Promote Docker image ${{ env.IMAGE_TAG }} to Argo CD"
+          add: "helm/http-echo-chart/values.yaml"
+          branch: main
