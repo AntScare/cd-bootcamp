@@ -17,7 +17,6 @@ podLabels: {}
 service:
   type: ClusterIP
   httpPort: 80
-  httpsPort: 443
 
 ## Ingress ressource
 ingress:
@@ -31,3 +30,4 @@ ingress:
 #   - secretName: certs/www.kube.dev.h.lo
 #     hosts:
 #     - www.k8s.local
+
