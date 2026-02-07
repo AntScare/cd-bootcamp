@@ -35,3 +35,11 @@ docker rm test
     git add <file>
     git commit -m <commit message>
     git push
+# How to get ArgoCD credentials?
+username: admin
+password using: 
+
+PS:
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | %{ [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
+Linux:
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode
