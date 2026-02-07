@@ -1,0 +1,33 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "http-echo.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "http-echo.name" . }}
+    helm.sh/chart: {{ include "http-echo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - {{- if .Values.ingress.host }}
+      host: {{ .Values.ingress.host }}
+      {{- end }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "http-echo.fullname" . }}
+                port:
+                  name: {{ .Values.ingress.servicePort }}
+          - path: /healthz
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "http-echo.fullname" . }}
+                port:
+                  name: {{ .Values.ingress.servicePort }}
+  {{- end }}
