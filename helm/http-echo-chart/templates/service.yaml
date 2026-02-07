@@ -13,9 +13,6 @@ spec:
     - name: http
       port: {{ .Values.service.httpPort }}
       targetPort: http
-    - name: https
-      port: {{ .Values.service.httpsPort }}
-      targetPort: https
   selector:
     app.kubernetes.io/name: {{ include "http-echo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
